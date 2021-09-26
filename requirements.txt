@@ -1,0 +1,3 @@
+pyinotify
+python-dateutil
+PyPDF4
