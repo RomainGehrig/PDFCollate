@@ -92,7 +92,9 @@ def merge_pdfs(first_path, second_path, destination):
 
             with open(destination, 'wb') as f:
                 output_pdf.write(f)
-            # TODO Change permissions of the output PDF
+            input_stats = os.stat(first_path)
+            os.chown(destination, input_stats.st_uid, input_stats.st_gid)
+            os.chmod(destination, input_stats.st_mode)
 
             return
 
