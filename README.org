@@ -7,8 +7,8 @@ If you just want to merge two PDFs in the correct order once and have pdftk inst
 Watch PDFs files created in ~SOURCE_DIRECTORY~. The first one will be used as is. The second one will be used with its page in reverse order (because we flip the document and start scanning from the end). The resulting PDF file will be created in ~DESTINATION_DIRECTORY~.
 
 How common problems are solved:
-- Don't merge a new PDF with an old one :: There is a timeout ~COLLATE_TIMEOUT~ that runs from the moment the first PDF is done writing (event ~IN_CLOSE_WRITE~). If a new PDF is created (event ~IN_CREATE~) before the timeout ends, then this new PDF is understood to be the second one. Otherwise (timeout passed), the new PDF becomes the first one and the previous one is evicted with a timeout warning.
-- Don't merge incompatible PDFs :: The number of pages should be equal for PDFs to be merged. If it's not the case, the second PDF replaces the first with a warning.
+- Merging a new PDF with an old one :: There is a timeout ~COLLATE_TIMEOUT~ that runs from the moment the first PDF is done writing (event ~IN_CLOSE_WRITE~). If a new PDF is created (event ~IN_CREATE~) before the timeout ends, then this new PDF is understood to be the second one. Otherwise (timeout passed), the new PDF becomes the first one and the previous one is evicted with a timeout warning.
+- Merging incompatible PDFs :: The number of pages should be equal for PDFs to be merged. If it's not the case, the second PDF replaces the first with a warning.
 
 Limitations:
 - Depends on inotify, so it can be used only on Linux (Docker can solve that).
