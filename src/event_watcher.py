@@ -92,6 +92,7 @@ def merge_pdfs(first_path, second_path, destination):
 
             with open(destination, 'wb') as f:
                 output_pdf.write(f)
+            # TODO Change permissions of the output PDF
 
             return
 
@@ -102,9 +103,7 @@ def only_pdfs(f):
         if not event.pathname.endswith('.pdf'):
             logger.info(f"Skipping file {event.pathname} because it is not a PDF")
             return
-
         return f(self, event, *args, **kwargs)
-
     return fun
 
 
