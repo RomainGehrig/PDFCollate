@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
 import sys
-from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Optional
 from enum import Enum
 from pathlib import Path
 import time
@@ -12,6 +12,7 @@ from functools import wraps
 import pyinotify
 from PyPDF4 import PdfFileReader, PdfFileWriter
 from dateutil import parser
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -52,11 +53,10 @@ mask = pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
 # 3) Merge PDFs "First" and "Second" with pdftk command: `pdftk A=first.pdf B=second.pdf shuffle A Bend-1 output collated.pdf`
 # 4) If successful, remove the two old files from the directory and from the watching process (First=None, Second=None)
 
-@dataclass
-class PDF:
+class PDF(BaseModel):
     path: Path
     created: datetime
-    ended: datetime
+    ended: Optional[datetime]
 
 class State(Enum):
     WAITING_FOR_FIRST = "WAITING_FOR_FIRST"
@@ -200,7 +200,6 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
                 logger.info(f"Starting processing of {self.first.path} and {self.second.path}")
                 self.state = State.PROCESSING
 
-
                 merge_pdfs(self.first.path, self.second.path, destination=destination)
             except:
                 logger.exception(f"Error while processing {self.first.path} and {self.second.path}")
@@ -212,9 +211,8 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
 
 
 wm = pyinotify.WatchManager()
-handler = PDFCollateWatch(COLLATE_TIMEOUT, "/tmp/output_pdfs", OUTPUT_NAME_SUFFIX)
+handler = PDFCollateWatch(COLLATE_TIMEOUT, DESTINATION_DIRECTORY, OUTPUT_NAME_SUFFIX)
 notifier = pyinotify.Notifier(wm, handler)
-#wdd = wm.add_watch(SOURCE_DIRECTORY, mask, rec=True)
-wdd = wm.add_watch('/tmp', mask, rec=True)
+wdd = wm.add_watch(SOURCE_DIRECTORY, mask, rec=True)
 
 notifier.loop()
