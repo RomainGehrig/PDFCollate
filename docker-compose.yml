@@ -2,9 +2,7 @@ version: '3.4'
 
 services:
   pdfcollate:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: cranium/pdfcollate:latest
     volumes:
       - /tmp:/files
       - ./output:/output
