@@ -15,6 +15,8 @@ Limitations:
 - Cannot distinguish between PDFs coming from your scanner and those created differently (eg. copied or temporary file). Set ~SOURCE_DIRECTORY~ to a directory where your scanner is the only one to write to, with no subdirectory. Also, don't set ~DESTINATION_DIRECTORY~ to the same directory.
 
 * Installation and configuration
+The Docker image is available as [[https://hub.docker.com/r/cranium/pdfcollate][~cranium/pdfcollate~]].
+
 My usage of the project:
 - I have a NAS with two SAMBA directories: one for single-sided scans (~/Scans~), and the other for two-sided scans (~/DuplexScans~).
 - My NAS docker-compose uses the project's Dockerfile and sets two volumes ~/DuplexScans:/files~ and ~/Scans:/output~.
@@ -34,7 +36,7 @@ My usage of the project:
 - Document utilisation :: Can be used as pure Python, as a Docker image, or in a docker-compose file
 - Make it a Python package :: Would enable one-off use. Eg: ~python3 -m pdfcollate~
 - Add CLI arguments for configuration :: For improved flexibility
-- Publish image to Docker registry :: Easier installation and docker-compose integration
 - Add tests :: Making sure we do the right thing in every case.
-- Improve file permissions :: We should copy the input file permissions to the output files.
 - Remove old files :: Once the merge is successful, we can remove the two old PDFs.
+- +Publish image to Docker registry :: Easier installation and docker-compose integration+
+- +Improve file permissions :: We should copy the input file permissions to the output files.+
