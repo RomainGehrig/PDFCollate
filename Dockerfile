@@ -18,6 +18,6 @@ RUN mkdir /output
 VOLUME ["/files"]
 VOLUME ["/output"]
 
-WORKDIR /opt/src
+WORKDIR /opt/pdfcollate
 
-ENTRYPOINT ["/opt/src/entrypoint.sh"]
+ENTRYPOINT ["/opt/entrypoint.sh"]
