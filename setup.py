@@ -18,7 +18,7 @@ URL = 'https://github.com/RomainGehrig/PDFCollate'
 EMAIL = 'romain.gehrig@gmail.com'
 AUTHOR = 'Romain Gehrig'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.1'
+VERSION = '0.1.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -76,8 +76,8 @@ class UploadCommand(Command):
         except OSError:
             pass
 
-        self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist'.format(sys.executable))
+        self.status('Building Source and Wheel distribution…')
+        os.system('{0} setup.py sdist bdist_egg'.format(sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
         os.system('twine upload dist/*')
