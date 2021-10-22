@@ -24,6 +24,8 @@ Limitations:
 
 The Docker image is available as [`cranium/pdfcollate`](https://hub.docker.com/r/cranium/pdfcollate).
 
+Also available is a Python package you can download with `pip install pdfcollate`.
+
 My usage of the project:
 
 -   I have a NAS with two SAMBA directories: one for single-sided scans (`/Scans`), and the other for two-sided scans (`/DuplexScans`).
@@ -48,10 +50,12 @@ My usage of the project:
 
 -   **Upgrade alpine:** Stuck at alpine:3.8 because it has the pdftk binary.
 -   **Document utilisation:** Can be used as pure Python, as a Docker image, or in a docker-compose file
--   **Make it a Python package:** Would enable one-off use. Eg: `python3 -m pdfcollate`
 -   **Add CLI arguments for configuration:** For improved flexibility
 -   **Add tests:** Making sure we do the right thing in every case.
 -   **Remove old files:** Once the merge is successful, we can remove the two old PDFs.
--   **+Publish image to Docker registry:** Easier installation and docker-compose integration+
--   **+Improve file permissions:** We should copy the input file permissions to the output files.+
+
+# Done
+-   **Make it a Python package:** Would enable one-off use. Eg: `python3 -m pdfcollate`
+-   **Publish image to Docker registry:** Easier installation and docker-compose integration~~
+-   **Improve file permissions:** We should copy the input file permissions to the output files.
 
