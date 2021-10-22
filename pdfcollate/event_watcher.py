@@ -211,6 +211,7 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
                 self.state = State.WAITING_FOR_FIRST
 
 
+print(f'PDFCollate watching for files in {SOURCE_DIRECTORY}, output to {DESTINATION_DIRECTORY}')
 wm = pyinotify.WatchManager()
 handler = PDFCollateWatch(COLLATE_TIMEOUT, DESTINATION_DIRECTORY, OUTPUT_NAME_SUFFIX)
 notifier = pyinotify.Notifier(wm, handler)
