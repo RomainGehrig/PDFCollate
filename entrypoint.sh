@@ -1,5 +1,7 @@
 #!/bin/sh
+set -e
 
-echo "PDFCollate image started."
+# Here put code that verifies setup is correct and/or setup the environment
 
-python3 event_watcher.py
+echo "Executing $@"
+exec "$@"

@@ -21,3 +21,5 @@ VOLUME ["/output"]
 WORKDIR /opt/pdfcollate
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
+
+CMD ["python3", "event_watcher.py"]
