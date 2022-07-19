@@ -39,6 +39,7 @@ My usage of the project:
 -   **`DESTINATION_DIRECTORY`:** Where the collated PDF will be created
 -   **`COLLATE_TIMEOUT`:** How much time before we consider two PDFs to be unrelated.
 -   **`OUTPUT_NAME_SUFFIX`:** Added to the output PDF name between the document name and `.pdf`
+-   **`DELETE_OLD_FILES`:** Remove files that have being correctly merged (True by default)
 
 
 # Why
@@ -52,10 +53,10 @@ My usage of the project:
 -   **Document utilisation:** Can be used as pure Python, as a Docker image, or in a docker-compose file
 -   **Add CLI arguments for configuration:** For improved flexibility
 -   **Add tests:** Making sure we do the right thing in every case.
--   **Remove old files:** Once the merge is successful, we can remove the two old PDFs.
 
 # Done
 -   **Make it a Python package:** Would enable one-off use. Eg: `python3 -m pdfcollate`
 -   **Publish image to Docker registry:** Easier installation and docker-compose integration~~
 -   **Improve file permissions:** We should copy the input file permissions to the output files.
+-   **Remove old files:** Once the merge is successful, we can remove the two old PDFs.
 
