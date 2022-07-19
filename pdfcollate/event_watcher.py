@@ -31,6 +31,7 @@ SOURCE_DIRECTORY = os.getenv("SOURCE_DIRECTORY", "/files")
 DESTINATION_DIRECTORY = os.getenv("DESTINATION_DIRECTORY", "/output")
 COLLATE_TIMEOUT = parse_timedelta(os.getenv("COLLATE_TIMEOUT", "10m"))
 OUTPUT_NAME_SUFFIX = os.getenv("OUTPUT_NAME_SUFFIX", "-collated")
+DELETE_OLD_FILES = os.getenv("DELETE_OLD_FILES", "true").lower() in ["true", 1]
 mask = pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
 
 
@@ -206,6 +207,9 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
                 logger.exception(f"Error while processing {self.first.path} and {self.second.path}")
             finally:
                 logger.info(f"End of processing for {self.first.path} and {self.second.path} -> {destination}")
+                if self.delete_old_files:
+                    self.first.path.unlink()
+                    self.second.path.unlink()
                 self.first = None
                 self.second = None
                 self.state = State.WAITING_FOR_FIRST
@@ -213,7 +217,7 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
 
 print(f'PDFCollate watching for files in {SOURCE_DIRECTORY}, output to {DESTINATION_DIRECTORY}')
 wm = pyinotify.WatchManager()
-handler = PDFCollateWatch(COLLATE_TIMEOUT, DESTINATION_DIRECTORY, OUTPUT_NAME_SUFFIX)
+handler = PDFCollateWatch(COLLATE_TIMEOUT, DESTINATION_DIRECTORY, OUTPUT_NAME_SUFFIX, DELETE_OLD_FILES)
 notifier = pyinotify.Notifier(wm, handler)
 wdd = wm.add_watch(SOURCE_DIRECTORY, mask, rec=True)
 
