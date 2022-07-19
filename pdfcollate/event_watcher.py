@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
+import logging
 import os
 import sys
-from datetime import datetime, timedelta
-from typing import Optional
-from enum import Enum
-from pathlib import Path
 import time
-import logging
+from datetime import datetime, timedelta
+from enum import Enum
 from functools import wraps
+from pathlib import Path
+from typing import Optional
 
 import pyinotify
-from PyPDF4 import PdfFileReader, PdfFileWriter
 from dateutil import parser
 from pydantic import BaseModel
+from PyPDF4 import PdfFileReader, PdfFileWriter
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -54,10 +54,12 @@ mask = pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
 # 3) Merge PDFs "First" and "Second" with pdftk command: `pdftk A=first.pdf B=second.pdf shuffle A Bend-1 output collated.pdf`
 # 4) If successful, remove the two old files from the directory and from the watching process (First=None, Second=None)
 
+
 class PDF(BaseModel):
     path: Path
     created: datetime
     ended: Optional[datetime]
+
 
 class State(Enum):
     WAITING_FOR_FIRST = "WAITING_FOR_FIRST"
@@ -69,17 +71,19 @@ class State(Enum):
 
 def pdfs_are_compatible(first, second):
     try:
+
         def get_page_number(pdf_path):
-            with open(pdf_path, 'rb') as f:
+            with open(pdf_path, "rb") as f:
                 return PdfFileReader(f).getNumPages()
+
         return get_page_number(first) == get_page_number(second)
     except:
         return False
 
 
 def merge_pdfs(first_path, second_path, destination):
-    with open(first_path, 'rb') as f1:
-        with open(second_path, 'rb') as f2:
+    with open(first_path, "rb") as f1:
+        with open(second_path, "rb") as f2:
             first = PdfFileReader(f1)
             second = PdfFileReader(f2)
 
@@ -91,7 +95,7 @@ def merge_pdfs(first_path, second_path, destination):
                 output_pdf.addPage(first.getPage(p1))
                 output_pdf.addPage(second.getPage(p2))
 
-            with open(destination, 'wb') as f:
+            with open(destination, "wb") as f:
                 output_pdf.write(f)
             input_stats = os.stat(first_path)
             os.chown(destination, input_stats.st_uid, input_stats.st_gid)
@@ -103,21 +107,23 @@ def merge_pdfs(first_path, second_path, destination):
 def only_pdfs(f):
     @wraps(f)
     def fun(self, event, *args, **kwargs):
-        if not event.pathname.endswith('.pdf'):
+        if not event.pathname.endswith(".pdf"):
             logger.info(f"Skipping file {event.pathname} because it is not a PDF")
             return
         return f(self, event, *args, **kwargs)
+
     return fun
 
 
 class PDFCollateWatch(pyinotify.ProcessEvent):
-    def __init__(self, timeout, output_dir, name_suffix, *args, **kwargs):
+    def __init__(self, timeout, output_dir, name_suffix, delete_old_files, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.first: PDF = None
         self.second: PDF = None
         self._state = State.WAITING_FOR_FIRST
         self.timeout = timeout
         self.output_dir = output_dir
+        self.delete_old_files = delete_old_files
         self.name_suffix = name_suffix or ""
 
     @property
@@ -131,7 +137,7 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
         self._state = new_state
 
     def reset_state(self):
-        logger.error(f'Resetting state from {self.state}: first was {self.first}, second was {self.second}')
+        logger.error(f"Resetting state from {self.state}: first was {self.first}, second was {self.second}")
         self.first: PDF = None
         self.second: PDF = None
         self.state = State.WAITING_FOR_FIRST
@@ -154,7 +160,9 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
         if self.state == State.WAITING_FOR_SECOND:
             # Case where we waited for too long after first was created:
             if now - self.first.ended > self.timeout:
-                logger.warning(f"Collate timeout: {self.first.path} was discarded from first position and {pdf.path} took its place.")
+                logger.warning(
+                    f"Collate timeout: {self.first.path} was discarded from first position and {pdf.path} took its place."
+                )
                 self.state = State.WAITING_FOR_SECOND
                 self.first = pdf
                 return
@@ -166,8 +174,10 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
     @only_pdfs
     def process_IN_CLOSE_WRITE(self, event):
         # Filter out files that are not being received
-        current_files = [self.first.path.as_posix() if self.first is not None else None,
-                         self.second.path.as_posix() if self.second is not None else None]
+        current_files = [
+            self.first.path.as_posix() if self.first is not None else None,
+            self.second.path.as_posix() if self.second is not None else None,
+        ]
         if event.pathname not in current_files:
             logger.warning(f"Skipping close write event for {event.pathname} as it is not in {current_files}")
             return
@@ -188,11 +198,12 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
         if self.state == State.RECEIVING_SECOND:
             self.second.ended = now
             if not pdfs_are_compatible(self.first.path, self.second.path):
-                logger.warning(f"PDFs are not compatible: {self.first.path} & {self.second.path}, removing {self.first.path}")
+                logger.warning(
+                    f"PDFs are not compatible: {self.first.path} & {self.second.path}, removing {self.first.path}"
+                )
                 self.first, self.second = self.second, None
                 self.state = State.WAITING_FOR_SECOND
                 return
-
 
             name, ext = os.path.splitext(self.first.path.name)
             destination_name = name + self.name_suffix + ext
@@ -215,7 +226,7 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
                 self.state = State.WAITING_FOR_FIRST
 
 
-print(f'PDFCollate watching for files in {SOURCE_DIRECTORY}, output to {DESTINATION_DIRECTORY}')
+print(f"PDFCollate watching for files in {SOURCE_DIRECTORY}, output to {DESTINATION_DIRECTORY}")
 wm = pyinotify.WatchManager()
 handler = PDFCollateWatch(COLLATE_TIMEOUT, DESTINATION_DIRECTORY, OUTPUT_NAME_SUFFIX, DELETE_OLD_FILES)
 notifier = pyinotify.Notifier(wm, handler)
