@@ -209,16 +209,18 @@ class PDFCollateWatch(pyinotify.ProcessEvent):
             destination_name = name + self.name_suffix + ext
             destination = Path(self.output_dir, destination_name)
 
+            merge_successful = False
             try:
                 logger.info(f"Starting processing of {self.first.path} and {self.second.path}")
                 self.state = State.PROCESSING
 
                 merge_pdfs(self.first.path, self.second.path, destination=destination)
+                merge_successful = True
             except:
                 logger.exception(f"Error while processing {self.first.path} and {self.second.path}")
             finally:
                 logger.info(f"End of processing for {self.first.path} and {self.second.path} -> {destination}")
-                if self.delete_old_files:
+                if self.delete_old_files and merge_successful:
                     self.first.path.unlink()
                     self.second.path.unlink()
                 self.first = None
